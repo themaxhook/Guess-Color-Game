@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Guessing Game</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0; /* Light background color */
+        }
+
+        #color-code {
+            margin-bottom: 20px;
+            background-color: #fff; /* White background for the color code */
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        #color-code h1 {
+            font-size: 2em;
+            color: #333; /* Darker text color */
+        }
+
+        #score-container { /* Container for the score */
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        #options-container {
+            display: flex;
+            gap: 10px; /* Space between the color options */
+        }
+
+        #options-container > div {
+            height: 80px; /* Increased size */
+            width: 80px; /* Increased size */
+            border-radius: 15px; /* More rounded corners */
+            border: none; /* Removed dotted border */
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* More prominent shadow */
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth transitions */
+        }
+
+        #options-container > div:hover {
+            transform: scale(1.1); /* Slightly less scale on hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* More prominent shadow on hover */
+        }
+                #options-container > div:active {
+            transform: scale(0.95); /* Slightly less scale on hover */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* More prominent shadow on hover */
+        }
+
+        /* Responsive adjustments (example) */
+        @media (max-width: 600px) {
+            #options-container {
+                flex-wrap: wrap; /* Allow wrapping on smaller screens */
+                justify-content: center; /* Center the options */
+            }
+
+            #options-container > div {
+                height: 60px;
+                width: 60px;
+                margin: 5px; /* Adjust margin */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="color-code">
+        <h1>rgb(255,6,7)</h1>
+    </div>
+
+    <div id="score-container"><h4><span id="score">Score: 0</span></h4></div>
+
+    <div id="options-container"></div>
+
+    <script>
+        const colorCode = document.querySelector("#color-code h1");
+        const optionsContainer = document.getElementById("options-container");
+        const scoreContainer = document.getElementById("score");
+        let randomColor = null;
+        let score = 0;
+
+        function generateRandomNumberBetween(min, max) {
+            return min + Math.floor(Math.random() * (max - min + 1));
+        }
+
+        function generateRandomColorRGB() {
+            const red = generateRandomNumberBetween(0, 255);
+            const green = generateRandomNumberBetween(0, 255);
+            const blue = generateRandomNumberBetween(0, 255);
+            return `rgb(${red}, ${green}, ${blue})`;
+        }
+
+        function incrementScore() {
+            score++;
+            scoreContainer.innerText = "Score: " + score; // Update score display
+            localStorage.setItem("score", score); // Store as number
+        }
+
+        function validateResult(el) {
+            const selectedColor = el.target.style.backgroundColor;
+
+            // Improved color comparison (more robust)
+            if (selectedColor.replace(/\s/g, '') === randomColor.replace(/\s/g, '')) {
+                incrementScore();
+            } else {
+                score = 0;
+                localStorage.setItem("score", score);
+                scoreContainer.innerText = "Score: " + score; // Update score display
+            }
+
+            startGame();
+        }
+
+        function startGame() {
+            const storedScore = localStorage.getItem('score');
+            score = storedScore ? parseInt(storedScore, 10) : 0; // Handle null and convert to int. Default to 0
+            scoreContainer.innerText = "Score: " + score; // Update score display
+
+            optionsContainer.innerHTML = null;
+
+            randomColor = generateRandomColorRGB();
+            colorCode.innerText = randomColor;
+
+            const ansIndex = generateRandomNumberBetween(0, 5);
+
+            for (let i = 0; i < 6; i++) {
+                const div = document.createElement("div");
+                div.addEventListener('click', validateResult);
+                div.style.backgroundColor = i === ansIndex ? randomColor : generateRandomColorRGB();
+                optionsContainer.append(div);
+            }
+        }
+
+        window.addEventListener("load", startGame);
+    </script>
+
+</body>
+</html>
